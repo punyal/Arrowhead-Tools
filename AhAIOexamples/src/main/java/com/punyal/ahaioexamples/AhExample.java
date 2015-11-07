@@ -35,6 +35,7 @@ public class AhExample {
     
     public AhExample() {
         ahAIO = new AhAIO("./alpha.jks", "abc1234", "./alpha.jks", "abc1234");
+        ahAIO.addProducer("test098", "temp-ws-https._tcp", "/t-out-07/temperature", 8082, false);
     }
     
     

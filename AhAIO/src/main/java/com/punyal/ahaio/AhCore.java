@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import se.bnearit.arrowhead.common.core.service.authorisation.AuthorisationControl;
 import se.bnearit.arrowhead.common.core.service.authorisation.ws.rest.AuthorisationControlConsumerREST_WS;
 import se.bnearit.arrowhead.common.core.service.authorisation.ws.rest.AuthorisationServiceTypes;
+import se.bnearit.arrowhead.common.core.service.discovery.ServiceDiscovery;
 import se.bnearit.arrowhead.common.core.service.discovery.dnssd.ServiceDiscoveryDnsSD;
 import se.bnearit.arrowhead.common.core.service.discovery.endpoint.HttpEndpoint;
 import se.bnearit.arrowhead.common.core.service.orchestration.OrchestrationStore;
@@ -44,14 +45,14 @@ import se.bnearit.arrowhead.common.service.ws.rest.ClientFactoryREST_WS;
  */
 class AhCore {
     private static final Logger LOGGER = Logger.getLogger(AhCore.class.getName());
-    private final ServiceDiscoveryDnsSD serviceDiscovery;
+    private final ServiceDiscovery serviceDiscovery;
     private final ClientFactoryREST_WS clientFactoryREST_WS;
     private HttpEndpoint authEndpoint;
     private HttpEndpoint orchEndpoint;
     
     
     public AhCore(String trustStoreFile, String trustStorePassword, String keyStoreFile, String keyStorePassword) {
-        serviceDiscovery = new ServiceDiscoveryDnsSD();
+        serviceDiscovery = new ServiceDiscoveryDnsSD("./tsig");
         clientFactoryREST_WS = new ClientFactoryREST_WS(trustStoreFile, trustStorePassword, keyStoreFile, keyStorePassword);
         authEndpoint = findAndCreateEndpoint(AuthorisationServiceTypes.REST_WS_AUTHORISATION_CTRL_SECURE);
         if (authEndpoint == null) {
@@ -93,6 +94,10 @@ class AhCore {
     
     public ClientFactoryREST_WS getClientFactory() {
         return clientFactoryREST_WS;
+    }
+    
+    public ServiceDiscovery getServiceDiscovery() {
+        return serviceDiscovery;
     }
             
 }

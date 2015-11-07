@@ -23,15 +23,15 @@
  */
 package com.punyal.ahaio;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
+import static com.punyal.ahaio.AhUtils.getVPNaddress;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.List;
 import java.util.logging.Level;
 import se.bnearit.arrowhead.common.core.service.authorisation.AuthorisationControl;
 import se.bnearit.arrowhead.common.core.service.authorisation.ws.rest.AuthorisationControlConsumerREST_WS;
+import se.bnearit.arrowhead.common.core.service.discovery.ServiceDiscovery;
+import se.bnearit.arrowhead.common.core.service.discovery.exception.ServiceRegisterException;
 import se.bnearit.arrowhead.common.core.service.orchestration.OrchestrationStore;
 import se.bnearit.arrowhead.common.core.service.orchestration.ws.rest.OrchestrationStoreConsumerREST_WS;
 
@@ -42,46 +42,56 @@ import se.bnearit.arrowhead.common.core.service.orchestration.ws.rest.Orchestrat
 public class AhAIO {
     private static final Logger LOGGER = Logger.getLogger(AhAIO.class.getName());
     private final AhCore ahCore;
-    private AuthorisationControl authControl;
-    private OrchestrationStore orchestration;
-    
-    
-    private List<AhProducer> ahProducers;
-    private List<AhConsumer> ahConsumers;
+    private final AuthorisationControl authControl;
+    private final OrchestrationStore orchestration;
+    private final List<AhProducer> ahProducers;
+    private final List<AhConsumer> ahConsumers;
+    private final String trustStoreFile;
+    private final String trustStorePassword;
+    private final String keyStoreFile;
+    private final String keyStorePassword;
 
     public AhAIO(String trustStoreFile, String trustStorePassword, String keyStoreFile, String keyStorePassword) {
         LOGGER.info("[Arrowhead All In One] Initialization");
+        this.trustStoreFile = trustStoreFile;
+        this.trustStorePassword = trustStorePassword;
+        this.keyStoreFile = keyStoreFile;
+        this.keyStorePassword = keyStorePassword;
         LOGGER.log(Level.INFO, "VPN address: {0}", getVPNaddress());
-        ahCore = new AhCore(trustStoreFile, trustStorePassword, keyStoreFile, keyStorePassword);
+        ahCore = new AhCore(this.trustStoreFile, this.trustStorePassword, this.keyStoreFile, this.keyStorePassword);
         authControl = new AuthorisationControlConsumerREST_WS(ahCore.getAuthEndpoint(), ahCore.getClientFactory());
         orchestration = new OrchestrationStoreConsumerREST_WS(ahCore.getOrchEndpoint(), ahCore.getClientFactory());
+        ahProducers = new ArrayList<>();
+        ahConsumers = new ArrayList<>();
+        // TODO: check if there are problems
     }
     
-    private String getVPNaddress() {
-        String ip = null;
+    
+    public void addProducer(String name, String serviceType, String path, int port, boolean secure) {
+        AhProducer ahProducer = new AhProducer(name, serviceType, path, port, secure, keyStoreFile, keyStorePassword, LOGGER, ahCore.getServiceDiscovery(), authControl);
         try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface iface = interfaces.nextElement();
-                // filters out 127.0.0.1 and inactive interfaces
-                if (iface.isLoopback() || !iface.isUp())
-                    continue;
-                if (iface.getDisplayName().substring(0,3).equals("VPN")) {
-                    Enumeration<InetAddress> addresses = iface.getInetAddresses();
-                    while(addresses.hasMoreElements()) {
-                        InetAddress addr = addresses.nextElement();
-                        ip = addr.getHostAddress();
-                        if (ip.substring(0, 3).equals("10."))
-                            return ip;
-                    }
-                }
+            if (ahProducer.isRunning()) {
+                System.out.println("Running");
+            } else {
+                System.out.println("Not Running");
             }
-        } catch (SocketException e) {
-            throw new RuntimeException(e);
+                
+            if (ahProducer.isPublished()) {
+                System.out.println("Published");
+                ahProducer.unpublish();
+            } else {
+                System.out.println("Not Published");
+                ahProducer.publish();
+                ahProducers.add(ahProducer);
+            }
+            
+            System.out.println("published");
+        } catch (ServiceRegisterException ex) {
+            //Logger.getLogger(AhAIO.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("ERROR: "+ex.getMessage());
+            ahProducer.stop();
         }
-        return ip;
     }
-    
     
     
 }

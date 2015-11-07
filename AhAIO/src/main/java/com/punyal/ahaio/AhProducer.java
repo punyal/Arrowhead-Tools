@@ -24,10 +24,36 @@
  */
 package com.punyal.ahaio;
 
+import java.util.logging.Logger;
+import se.bnearit.arrowhead.common.core.service.authorisation.AuthorisationControl;
+import se.bnearit.arrowhead.common.core.service.discovery.ServiceDiscovery;
+import se.bnearit.arrowhead.common.core.service.discovery.endpoint.HttpEndpoint;
+import se.bnearit.arrowhead.common.service.ServiceProducer;
+import se.bnearit.arrowhead.common.service.ws.rest.BaseProviderREST_WS;
+import se.bnearit.resource.ResourceAllocator;
+
 /**
  *
  * @author Pablo Puñal Pereira <pablo.punal@ltu.se>
  */
-class AhProducer {
+class AhProducer extends BaseProviderREST_WS implements ServiceProducer {
+    private final AuthorisationControl authControl;
+    private final int resourceId;
+    private final String name;
+    private final String serviceType;
+    private final String path;
+    private final int port;
+    
+    public AhProducer(String name, String serviceType, String path, int port, boolean secure, String keyStoreFile, String keyStorePassword, Logger LOGGER, ServiceDiscovery serviceDiscovery, AuthorisationControl authControl) {
+        super(name, serviceType, secure, keyStoreFile, keyStorePassword, LOGGER, serviceDiscovery);
+        this.name = name;
+        this.serviceType = serviceType;
+        this.path = path;
+        this.port = port;
+        this.authControl = authControl;
+        resourceId = ResourceAllocator.getInstance().allocateResourceId();
+        this.endpoint = new HttpEndpoint("rh102.test.bnearit.arrowhead.eu", port, path);
+    }
+    
     
 }
