@@ -23,8 +23,17 @@
  */
 package com.punyal.ahaio;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 import java.util.List;
+import java.util.logging.Level;
+import se.bnearit.arrowhead.common.core.service.authorisation.AuthorisationControl;
+import se.bnearit.arrowhead.common.core.service.authorisation.ws.rest.AuthorisationControlConsumerREST_WS;
+import se.bnearit.arrowhead.common.core.service.orchestration.OrchestrationStore;
+import se.bnearit.arrowhead.common.core.service.orchestration.ws.rest.OrchestrationStoreConsumerREST_WS;
 
 /**
  *
@@ -32,18 +41,47 @@ import java.util.List;
  */
 public class AhAIO {
     private static final Logger LOGGER = Logger.getLogger(AhAIO.class.getName());
+    private final AhCore ahCore;
+    private AuthorisationControl authControl;
+    private OrchestrationStore orchestration;
+    
+    
     private List<AhProducer> ahProducers;
     private List<AhConsumer> ahConsumers;
 
-    public AhAIO() {
+    public AhAIO(String trustStoreFile, String trustStorePassword, String keyStoreFile, String keyStorePassword) {
         LOGGER.info("[Arrowhead All In One] Initialization");
-        configureCORE();
+        LOGGER.log(Level.INFO, "VPN address: {0}", getVPNaddress());
+        ahCore = new AhCore(trustStoreFile, trustStorePassword, keyStoreFile, keyStorePassword);
+        authControl = new AuthorisationControlConsumerREST_WS(ahCore.getAuthEndpoint(), ahCore.getClientFactory());
+        orchestration = new OrchestrationStoreConsumerREST_WS(ahCore.getOrchEndpoint(), ahCore.getClientFactory());
     }
     
-    private boolean configureCORE() {
-        boolean ret = false;
-        
-        return ret;
+    private String getVPNaddress() {
+        String ip = null;
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                // filters out 127.0.0.1 and inactive interfaces
+                if (iface.isLoopback() || !iface.isUp())
+                    continue;
+                if (iface.getDisplayName().substring(0,3).equals("VPN")) {
+                    Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                    while(addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        ip = addr.getHostAddress();
+                        if (ip.substring(0, 3).equals("10."))
+                            return ip;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
+        return ip;
     }
+    
+    
     
 }

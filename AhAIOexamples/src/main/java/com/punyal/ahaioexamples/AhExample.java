@@ -31,10 +31,10 @@ import com.punyal.ahaio.AhAIO;
  * @author Pablo Puñal Pereira <pablo.punal@ltu.se>
  */
 public class AhExample {
-    private AhAIO ahAIO;
+    private final AhAIO ahAIO;
     
     public AhExample() {
-        ahAIO = new AhAIO();
+        ahAIO = new AhAIO("./alpha.jks", "abc1234", "./alpha.jks", "abc1234");
     }
     
     
