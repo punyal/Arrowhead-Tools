@@ -30,9 +30,12 @@ import java.util.List;
 import java.util.logging.Level;
 import se.bnearit.arrowhead.common.core.service.authorisation.AuthorisationControl;
 import se.bnearit.arrowhead.common.core.service.authorisation.ws.rest.AuthorisationControlConsumerREST_WS;
+import se.bnearit.arrowhead.common.core.service.discovery.ServiceDiscovery;
 import se.bnearit.arrowhead.common.core.service.discovery.exception.ServiceRegisterException;
 import se.bnearit.arrowhead.common.core.service.orchestration.OrchestrationStore;
 import se.bnearit.arrowhead.common.core.service.orchestration.ws.rest.OrchestrationStoreConsumerREST_WS;
+import se.bnearit.arrowhead.common.service.ServiceIdentity;
+import se.bnearit.arrowhead.common.service.ServiceInformation;
 
 /**
  *
@@ -64,7 +67,6 @@ public class AhAIO {
         orchestration = new OrchestrationStoreConsumerREST_WS(ahCore.getOrchEndpoint(), ahCore.getClientFactory());
         ahProducers = new ArrayList<>();
         ahConsumers = new ArrayList<>();
-        // TODO: check if there are problems
         
         // Remove all the producers when exit
         Runtime.getRuntime().addShutdownHook(
@@ -76,7 +78,6 @@ public class AhAIO {
                 }
         );
     }
-    
     
     public void addProducer(String name, String serviceType, String path, String url, int port, boolean secure) {
         AhProducer ahProducer = new AhProducer(name, serviceType, path, url, port, secure, keyStoreFile, keyStorePassword, LOGGER, ahCore.getServiceDiscovery(), authControl);
@@ -115,18 +116,67 @@ public class AhAIO {
     private void removeAllProducers() {
         System.out.println("Removing All Producers...");
         List<String> toRemove = new ArrayList<>();
-        for (AhProducer producer : ahProducers) {
+        for (AhProducer producer : ahProducers)
             toRemove.add(producer.getName());
-        }
-        for (String producerName : toRemove) {
+        for (String producerName : toRemove)
             removeProducer(producerName);
-        }
-        //removeProducer("000Temp");
     }
     
     public void printServiceDiscovery() {
-        AhServiceDiscovery ahSD = new AhServiceDiscovery(ahCore.getServiceDiscovery());
-        ahSD.execute(null, null);
+        //AhServiceDiscovery ahSD = new AhServiceDiscovery(ahCore.getServiceDiscovery());
+        //ahSD.execute(null, null);
+        System.out.println("Service Discovery");
+        List<ServiceIdentity> services = ahCore.getServiceDiscovery().getAllServices();
+            for (ServiceIdentity service : services)
+                System.out.println("Id:"+service.getId()+" Type:"+ service.getType());
+        
+    }
+        
+    public AhService findService(String serviceName) {
+        AhService ahService = null;
+        List<ServiceIdentity> services = ahCore.getServiceDiscovery().getAllServices();
+        
+        for (ServiceIdentity service: services) {
+            String temp = service.getId();
+            if (temp.subSequence(0, temp.indexOf(".")).equals(serviceName)) {
+                ServiceInformation serviceInfo = ahCore.getServiceDiscovery().getServiceInformation(service, "HttpEndpoint");
+                if (serviceInfo!=null) {
+                    String tmp = serviceInfo.getEndpoint().toString();
+                    String info = tmp.substring(tmp.indexOf("[")+1, tmp.lastIndexOf("]"));
+                    String[] data = info.replaceAll("\\s","").split(",");
+                    String host = null;
+                    String port = null;
+                    String path = null;
+                    String secure = null;
+                    for (String dat:data) {
+                        String type = dat.substring(0, dat.indexOf("="));
+                        switch (type) {
+                            case "host":
+                                host = dat.substring(type.length()+1);
+                                break;
+                            case "port":
+                                port = dat.substring(type.length()+1);
+                                break;
+                            case "path":
+                                path = dat.substring(type.length()+1);
+                                break;
+                            case "secure":
+                                secure = dat.substring(type.length()+1);
+                                break;
+                            default: break;
+                        }
+                    }
+                    ahService = new AhService(service.getId().substring(0, service.getId().indexOf(".")),
+                            service.getType(),
+                            host,
+                            Integer.parseInt(port),
+                            path,
+                            Boolean.parseBoolean(secure));
+                    
+                }
+            }
+        }
+        return ahService;
     }
     
 }

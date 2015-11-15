@@ -25,7 +25,9 @@
 package com.punyal.ahaioexamples;
 
 import com.punyal.ahaio.AhAIO;
+import com.punyal.ahaio.AhService;
 import com.punyal.ahaio.AhUtils;
+import se.bnearit.arrowhead.common.service.ServiceIdentity;
 
 /**
  *
@@ -55,14 +57,25 @@ public class AhExample implements Runnable{
             counter++;
             System.out.format("[%3ds]\n",counter);
             
-            // in 10 secs we publish a service
+            // in 10 secs - publish a service
             if (counter == 10) ahAIO.addProducer("00Temp", "temp-ws-coap._udp", "/temperature00", AhUtils.getVPNurlBnearIT(), 5683, false);
-            // in 20 secs we publish a service
+            // in 20 secs - publish a service
             if (counter == 20) ahAIO.addProducer("01Temp", "temp-ws-coap._udp", "/temperature01", AhUtils.getVPNurlBnearIT(), 5683, false);
 
-            // in 30 secs we publish a service
+            // in 30 secs - check all services
             if (counter == 30) ahAIO.printServiceDiscovery();
-
+            
+            // in 40 secs - find services
+            if (counter == 40) {
+                AhService service= ahAIO.findService("00Temp");
+                if (service != null) {
+                    System.out.println(service.toString());
+                }
+                
+                String coapUri = service.getCoapURI();
+                if (coapUri!=null) System.out.println("It is a coap Service: ["+coapUri+"]");
+                
+            }
             
             try {
                 Thread.sleep(1000);
