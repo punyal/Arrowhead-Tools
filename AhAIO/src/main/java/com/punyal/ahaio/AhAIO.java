@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.logging.Level;
 import se.bnearit.arrowhead.common.core.service.authorisation.AuthorisationControl;
 import se.bnearit.arrowhead.common.core.service.authorisation.ws.rest.AuthorisationControlConsumerREST_WS;
-import se.bnearit.arrowhead.common.core.service.discovery.ServiceDiscovery;
 import se.bnearit.arrowhead.common.core.service.discovery.exception.ServiceRegisterException;
 import se.bnearit.arrowhead.common.core.service.orchestration.OrchestrationStore;
 import se.bnearit.arrowhead.common.core.service.orchestration.ws.rest.OrchestrationStoreConsumerREST_WS;

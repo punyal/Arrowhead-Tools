@@ -27,7 +27,6 @@ package com.punyal.ahaioexamples;
 import com.punyal.ahaio.AhAIO;
 import com.punyal.ahaio.AhService;
 import com.punyal.ahaio.AhUtils;
-import se.bnearit.arrowhead.common.service.ServiceIdentity;
 
 /**
  *
