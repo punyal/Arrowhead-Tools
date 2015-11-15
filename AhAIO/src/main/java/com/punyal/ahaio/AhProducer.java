@@ -42,17 +42,19 @@ class AhProducer extends BaseProviderREST_WS implements ServiceProducer {
     private final String name;
     private final String serviceType;
     private final String path;
+    private final String url;
     private final int port;
     
-    public AhProducer(String name, String serviceType, String path, int port, boolean secure, String keyStoreFile, String keyStorePassword, Logger LOGGER, ServiceDiscovery serviceDiscovery, AuthorisationControl authControl) {
+    public AhProducer(String name, String serviceType, String path, String url, int port, boolean secure, String keyStoreFile, String keyStorePassword, Logger LOGGER, ServiceDiscovery serviceDiscovery, AuthorisationControl authControl) {
         super(name, serviceType, secure, keyStoreFile, keyStorePassword, LOGGER, serviceDiscovery);
         this.name = name;
         this.serviceType = serviceType;
         this.path = path;
         this.port = port;
         this.authControl = authControl;
+        this.url = url;
         resourceId = ResourceAllocator.getInstance().allocateResourceId();
-        this.endpoint = new HttpEndpoint("rh102.test.bnearit.arrowhead.eu", port, path);
+        this.endpoint = new HttpEndpoint(url, port, path);
     }
     
     

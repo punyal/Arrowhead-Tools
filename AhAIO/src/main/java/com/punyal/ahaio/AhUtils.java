@@ -32,7 +32,7 @@ import java.util.Enumeration;
  *
  * @author Pablo Puñal Pereira <pablo.punal@ltu.se>
  */
-class AhUtils {
+public class AhUtils {
     public static String getVPNaddress() {
         String ip = null;
         try {
@@ -56,5 +56,15 @@ class AhUtils {
             throw new RuntimeException(e);
         }
         return ip;
+    }
+    
+    public static String getVPNurlBnearIT() {
+        String url = null;
+        String addr = getVPNaddress();
+        if (addr != null) {
+            String subnet = addr.substring(addr.lastIndexOf(".")+1);
+            url = "rh"+subnet+".test.bnearit.arrowhead.eu";
+        }
+        return url;
     }
 }

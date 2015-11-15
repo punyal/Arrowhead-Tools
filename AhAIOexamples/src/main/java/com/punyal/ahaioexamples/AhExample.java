@@ -25,24 +25,39 @@
 package com.punyal.ahaioexamples;
 
 import com.punyal.ahaio.AhAIO;
+import com.punyal.ahaio.AhUtils;
 
 /**
  *
  * @author Pablo Puñal Pereira <pablo.punal@ltu.se>
  */
-public class AhExample {
+public class AhExample implements Runnable{
     private final AhAIO ahAIO;
+    private final boolean running = true;
     
     public AhExample() {
-        ahAIO = new AhAIO("./alpha.jks", "abc1234", "./alpha.jks", "abc1234");
-        ahAIO.addProducer("test098", "temp-ws-https._tcp", "/t-out-07/temperature", 8082, false);
+        System.out.println("My VPN IP: "+AhUtils.getVPNaddress());
+        System.out.println("My URL: "+AhUtils.getVPNurlBnearIT());
+        ahAIO = new AhAIO("./alpha.jks", "abc1234", "./alpha.jks", "abc1234", "./tsig");
+        ahAIO.addProducer("000Temp", "temp-ws-coap._udp", "/temperature", AhUtils.getVPNurlBnearIT(), 8082, false);
+        System.out.println("addProducer");
     }
     
     
     public static void main(String[] args) {
         System.out.println("Starting...");
-        AhExample example = new AhExample();
-        
+        (new Thread(new AhExample())).start();
     }
-            
+
+    @Override
+    public void run() {
+        while (running) {
+            System.out.println(".");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }   
 }

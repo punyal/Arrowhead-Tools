@@ -51,8 +51,8 @@ class AhCore {
     private HttpEndpoint orchEndpoint;
     
     
-    public AhCore(String trustStoreFile, String trustStorePassword, String keyStoreFile, String keyStorePassword) {
-        serviceDiscovery = new ServiceDiscoveryDnsSD("./tsig");
+    public AhCore(String trustStoreFile, String trustStorePassword, String keyStoreFile, String keyStorePassword, String tsigFile) {
+        serviceDiscovery = new ServiceDiscoveryDnsSD(tsigFile);
         clientFactoryREST_WS = new ClientFactoryREST_WS(trustStoreFile, trustStorePassword, keyStoreFile, keyStorePassword);
         authEndpoint = findAndCreateEndpoint(AuthorisationServiceTypes.REST_WS_AUTHORISATION_CTRL_SECURE);
         if (authEndpoint == null) {
