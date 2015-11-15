@@ -1,7 +1,7 @@
 # Arrowhead-Tools
-Produce and Consume AH Services were been never before so easy. Arrowhead AIO (All In One) allows to create Ah Services with no extra dependencies and in a simpel way.
 ##### Version 0.1
-##### How to use it
+Produce and Consume AH Services were been never before so easy. Arrowhead AIO (All In One) allows to create Ah Services with no extra dependencies and in a simpel way.
+##### How to use it (see example on the [AhExample](https://github.com/punyal/Arrowhead-Tools/blob/master/AhAIOexamples/src/main/java/com/punyal/ahaioexamples/AhExample.java))
 First Initialize AhAIO object:
 ```java
 AhAIO ahAIO = new AhAIO(trustStoreFile, trustStorePassword, keyStoreFile, keyStorePassword, tsigFile);
@@ -32,4 +32,13 @@ For CoAP resources it able to generate directly the URL (Feel free to add other 
 service.getCoapURI();
 ```
 
+##### Other features:
+get your VPN address:
+```java
+AhUtils.getVPNaddress();
+```
+get your BnearIT address:
+```java
+AhUtils.getVPNurlBnearIT());
+```
  
