@@ -80,50 +80,29 @@ public class AhAIO {
     
     public void addProducer(String name, String serviceType, String path, String url, int port, boolean secure) {
         AhProducer ahProducer = new AhProducer(name, serviceType, path, url, port, secure, keyStoreFile, keyStorePassword, LOGGER, ahCore.getServiceDiscovery(), authControl);
-        try {
-            if (ahProducer.isRunning()) {
-                //System.out.println("Running");
-            } else {
-                //System.out.println("Not Running");
-            }
-                
-            if (ahProducer.isPublished()) {
-                //System.out.println("Published");
-                ahProducer.unpublish();
-            } else {
-                //System.out.println("Not Published");
+        try {                
+            if (!ahProducer.isPublished()) {
                 ahProducer.publish();
                 ahProducers.add(ahProducer);
+                System.out.println("\nNew Service Published \n - Name: "+ahProducer.getName()+"\n - Type: "+ahProducer.getServiceType()+"\n - URL:  "+ahProducer.getURL()+"\n - Path: "+ahProducer.getPath()+"\n - Port: "+ahProducer.getPort()+"\n");
             }
-            
-            System.out.println("published");
         } catch (ServiceRegisterException ex) {
-            //Logger.getLogger(AhAIO.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("ERROR: "+ex.getMessage());
+            LOGGER.log(Level.SEVERE, null, ex);
             ahProducer.stop();
         }
     }
     
-    private void removeProducer(AhProducer ahProducer) {
-        //Logger.getLogger(AhAIO.class.getName()).log(Level.SEVERE, null, ex);
-        
-        if (ahProducer.isRunning()) {
-            System.out.println("Running");
-        } else {
-            System.out.println("Not Running");
-        }
+    private synchronized void removeProducer(AhProducer ahProducer) {
         if (ahProducer.isPublished()) {
-            System.out.println("Published");
             ahProducer.unpublish();
-            System.out.println("UnPublished");
+            ahProducers.remove(ahProducer);
+            System.out.println("Service ["+ahProducer.getName()+"] is now unPublished.");
         } else {
-            System.out.println("Not Published");
-            //ahProducer.publish();
-            //ahProducers.add(ahProducer);
+            LOGGER.log(Level.WARNING, "Service {0} was not Published.", ahProducer.getName());
         }
     }
     
-    private synchronized void removeProducer(String name) {
+    public synchronized void removeProducer(String name) {
         AhProducer toRemove = null;
         for (AhProducer producer : ahProducers) {
             if (producer.getName().equals(name)) {
@@ -133,10 +112,21 @@ public class AhAIO {
         if (toRemove!=null) removeProducer(toRemove);
     }
     
-    public void removeAllProducers() {
-        System.out.println("Removing All the producers...");
-        removeProducer("000Temp");
+    private void removeAllProducers() {
+        System.out.println("Removing All Producers...");
+        List<String> toRemove = new ArrayList<>();
+        for (AhProducer producer : ahProducers) {
+            toRemove.add(producer.getName());
+        }
+        for (String producerName : toRemove) {
+            removeProducer(producerName);
+        }
+        //removeProducer("000Temp");
     }
     
+    public void printServiceDiscovery() {
+        AhServiceDiscovery ahSD = new AhServiceDiscovery(ahCore.getServiceDiscovery());
+        ahSD.execute(null, null);
+    }
     
 }

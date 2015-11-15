@@ -34,13 +34,13 @@ import com.punyal.ahaio.AhUtils;
 public class AhExample implements Runnable{
     private final AhAIO ahAIO;
     private final boolean running = true;
+    private int counter;
     
     public AhExample() {
+        counter = 0;
         System.out.println("My VPN IP: "+AhUtils.getVPNaddress());
         System.out.println("My URL: "+AhUtils.getVPNurlBnearIT());
-        ahAIO = new AhAIO("./alpha.jks", "abc1234", "./alpha.jks", "abc1234", "./tsig");
-        ahAIO.addProducer("000Temp", "temp-ws-coap._udp", "/temperature", AhUtils.getVPNurlBnearIT(), 8082, false);
-        System.out.println("addProducer");
+        ahAIO = new AhAIO("./alpha.jks", "abc1234", "./alpha.jks", "abc1234", "./tsig");    
     }
     
     
@@ -52,7 +52,18 @@ public class AhExample implements Runnable{
     @Override
     public void run() {
         while (running) {
-            System.out.println(".");
+            counter++;
+            System.out.format("[%3ds]\n",counter);
+            
+            // in 10 secs we publish a service
+            if (counter == 10) ahAIO.addProducer("00Temp", "temp-ws-coap._udp", "/temperature00", AhUtils.getVPNurlBnearIT(), 5683, false);
+            // in 20 secs we publish a service
+            if (counter == 20) ahAIO.addProducer("01Temp", "temp-ws-coap._udp", "/temperature01", AhUtils.getVPNurlBnearIT(), 5683, false);
+
+            // in 30 secs we publish a service
+            if (counter == 30) ahAIO.printServiceDiscovery();
+
+            
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {

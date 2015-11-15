@@ -57,5 +57,16 @@ class AhProducer extends BaseProviderREST_WS implements ServiceProducer {
         this.endpoint = new HttpEndpoint(url, port, path);
     }
     
+    public String getPath(){
+        return path;
+    }
+    
+    public String getURL(){
+        return url;
+    }
+    
+    public int getPort(){
+        return port;
+    }
     
 }
